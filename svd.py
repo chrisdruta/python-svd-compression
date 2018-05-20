@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 import os, PIL, PIL.Image
 
 script_dir = os.path.dirname(__file__)
@@ -12,18 +13,21 @@ A = np.asarray(rawImage)
 Aherm = A.transpose() # Always real-valued, so transpose is fine
 AstarA = np.matmul(Aherm, A)
 
-print("Normal check:")
-
-offset1 = np.matmul(A, Aherm) - AstarA
-offset2 = AstarA - np.matmul(A, Aherm)
-
-if np.array_equal(offset1, offset2):
-    print("Offsets equal")
-else:
-    print("Offsets not equal")
-
-#AstarA_eigenValues, AstarA_eigenVectors = np.linalg.eig(AstarA)
+AstarA_eigenValues, AstarA_eigenVectors = np.linalg.eig(AstarA)
 
 #for evalue in AstarA_eigenValues:
 #    if evalue < 0:
 #        print(evalue)
+
+U, s, V = np.linalg.svd(A)
+S = np.diagflat(s)
+
+Areconstructed = np.matmul(np.matmul(U, S), V).astype(int)
+
+# Show comparison
+print(A)
+print(Areconstructed)
+
+std = np.std(A-Areconstructed)
+print ("MSE:")
+print(std**2)
